@@ -1,6 +1,6 @@
 <?php
 
-header('Content-type: text/json');
+header('Content-type: application/json');
 
 $content = iconv('windows-1254', 'utf-8', file_get_contents("http://www.koeri.boun.edu.tr/scripts/lst0.asp"));
 
@@ -42,7 +42,6 @@ $rows = array_filter(array_map(function ($row) {
 $arr = [];
 
 foreach ($rows as $row) {
-
     $arr[] = [
         'fingerpass' => md5($row[0] . sprintf("%s,%s", $row[1], $row[2]) . $row[5] . $row[7]),
         'time' => array(
@@ -51,11 +50,13 @@ foreach ($rows as $row) {
         ),
         'geolocation' => sprintf("%s,%s", $row[1], $row[2]),
         'depth' => $row[3],
+        'md' => !empty($row[4]) ? $row[4] : null,
         'ml' => $row[5],
+        'mw' => !empty($row[6]) ? $row[6] : null,
         'location' => array(
             'full' => $row[7],
-            'city' => str_replace(array('(', ')'), '', explode('(', $row[7])[1]),
-            'state' => count(explode('-', explode('(', $row[7])[0])) > 1 ? explode('-', explode('(', $row[7])[0])[1] : explode('(', $row[7])[0],
+            'city' => strpos($row[7], '(') !== false ? str_replace(array('(', ')'), '', explode('(', $row[7])[1]) : null,
+            'state' => count(explode('-', explode('(', $row[7])[0])) > 1 ? trim(explode('-', explode('(', $row[7])[0])[1]) : trim(explode('(', $row[7])[0]),
             'district' => count(explode('-', explode('(', $row[7])[0])) > 1 ? explode('-', explode('(', $row[7])[0])[0] : null,
         ),
         'precision' => $row[8]
